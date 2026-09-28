@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SIGED · Sistema Integral de Gestión y Evaluación de Donantes de Sangre</title>
+<style>
+:root{--rojo:#8a0000;--rojo2:#b31111;--osc:#26140f;--med:#5a4a44;--fondo:#faf7f5;--borde:#e3d8d4;--ok:#1f7a3d;--err:#b31111}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:76px}
+body{margin:0;background:var(--fondo);color:var(--osc);font-family:'Segoe UI',Arial,sans-serif;line-height:1.6}
+.wrap{max-width:1000px;margin:0 auto;padding:0 24px}
+section{padding:48px 0}
+h1,h2,h3{font-family:Georgia,serif;margin:0 0 12px}
+p{margin:0 0 10px}
+header{background:#fff;border-bottom:1px solid var(--borde);position:sticky;top:0;z-index:10}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;max-width:1000px;margin:0 auto;gap:12px;flex-wrap:wrap}
+.nav-left{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--rojo)}
+.logo-badge{width:44px;height:44px;border-radius:50%;overflow:hidden;border:1px solid var(--borde);background:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.logo-badge img{width:100%;height:100%;object-fit:cover}
+.burger{width:44px;height:44px;border:1px solid var(--borde);border-radius:8px;background:#fff;cursor:pointer;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;padding:0}
+.burger:hover{border-color:var(--rojo)}
+.burger span{display:block;width:22px;height:2px;background:var(--rojo);border-radius:2px;transition:.2s}
+.burger.abierto span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.burger.abierto span:nth-child(2){opacity:0}
+.burger.abierto span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.menu-wrap{position:relative}
+.menu{position:absolute;right:0;top:calc(100% + 10px);width:240px;background:#fff;border:1px solid var(--borde);border-radius:10px;box-shadow:0 8px 24px rgba(38,20,15,.15);padding:8px;display:none;z-index:20}
+.menu.abierto{display:block}
+.menu a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:6px;color:var(--osc);text-decoration:none;font-size:.95rem}
+.menu a:hover{background:#fbeeee;color:var(--rojo)}
+.menu a.activo{background:#fbeeee;color:var(--rojo);font-weight:700}
+.menu svg{width:22px;height:22px;flex-shrink:0}
+.btn{display:inline-block;padding:10px 18px;border-radius:6px;border:1px solid var(--rojo);background:#fff;color:var(--rojo);font-size:.92rem;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s}
+.btn:hover{background:#f5e6e3}
+.btn-p{background:var(--rojo);color:#fff}
+.btn-p:hover{background:var(--rojo2)}
+.hero{background:#fff;border-bottom:1px solid var(--borde)}
+.hero .wrap{display:grid;grid-template-columns:1.3fr 1fr;gap:32px;align-items:center;padding-top:48px;padding-bottom:48px}
+.hero h1{font-size:2.1rem;color:var(--rojo)}
+.lead{color:var(--med);font-size:1.05rem}
+.btns{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px}
+.hero svg{width:100%;height:auto;max-height:300px}
+.kicker{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--rojo2);margin-bottom:6px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:22px}
+.stat{border:1px solid var(--borde);border-radius:8px;padding:10px;text-align:center;background:var(--fondo)}
+.stat b{display:block;font-family:Georgia,serif;font-size:1.5rem;color:var(--rojo)}
+.stat span{font-size:.8rem;color:var(--med)}
+/* pestañas */
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.tab{background:#fff;border:1px solid var(--borde);border-radius:10px;padding:16px;text-align:center;cursor:pointer;font-family:inherit;color:var(--osc);transition:.15s}
+.tab:hover{border-color:var(--rojo)}
+.tab.on{border-color:var(--rojo);background:#fbeeee;box-shadow:0 0 0 2px var(--rojo) inset}
+.tab svg{width:44px;height:44px;display:block;margin:0 auto 6px}
+.tab strong{font-size:.92rem;color:var(--rojo)}
+.panel{background:#fff;border:1px solid var(--borde);border-radius:10px;padding:24px;display:none}
+.panel.on{display:block}
+.panel p.d{color:var(--med)}
+label{display:block;font-size:.85rem;font-weight:600;margin:10px 0 4px}
+input,select{width:100%;padding:9px 10px;border:1px solid var(--borde);border-radius:6px;font:inherit;background:#fff}
+input:focus,select:focus{outline:2px solid var(--rojo2);border-color:transparent}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+.msg{margin-top:14px;padding:10px 14px;border-radius:6px;font-size:.92rem;display:none}
+.msg.ok{display:block;background:#e8f5ec;color:var(--ok);border:1px solid #b9dfc6}
+.msg.err{display:block;background:#fdecec;color:var(--err);border:1px solid #f0bcbc}
+.msg.info{display:block;background:#fbf3e6;color:#7a5200;border:1px solid #ecd6a8}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--borde)}
+th,td{padding:10px 12px;border-bottom:1px solid var(--borde);text-align:left;font-size:.92rem}
+th{background:var(--fondo);color:var(--rojo)}
+.barras{display:grid;gap:8px;margin-top:12px}
+.barra{display:grid;grid-template-columns:40px 1fr 30px;gap:10px;align-items:center;font-size:.9rem}
+.barra div.t{background:#f1e6e3;border-radius:5px;height:20px;overflow:hidden}
+.barra div.t i{display:block;height:100%;background:var(--rojo2);width:0;transition:width .5s}
+/* requisitos */
+.req{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.rq{background:#fff;border:1px solid var(--borde);border-radius:10px;padding:18px;text-align:center}
+.rq svg{width:38px;height:38px;margin-bottom:4px}
+.rq .v{font-family:Georgia,serif;font-size:1.3rem;color:var(--rojo)}
+.rq p{font-size:.88rem;color:var(--med);margin:0}
+/* compatibilidad */
+.tipos{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.tipo{width:64px;height:64px;border-radius:50%;border:2px solid var(--borde);background:#fff;font:700 1.05rem Georgia,serif;color:var(--rojo);cursor:pointer;transition:.15s}
+.tipo:hover{border-color:var(--rojo)}
+.tipo.on{background:var(--rojo);color:#fff;border-color:var(--rojo)}
+.comp{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.comp div{background:#fff;border:1px solid var(--borde);border-radius:10px;padding:16px}
+.comp h3{font-size:1rem;color:var(--rojo)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{background:#fbeeee;color:var(--rojo);border:1px solid #efc9c9;border-radius:20px;padding:3px 12px;font-weight:700;font-size:.9rem}
+.inst{background:#fff;border:1px solid var(--borde);border-left:4px solid var(--rojo);border-radius:8px;padding:22px;display:flex;gap:16px;align-items:flex-start}
+.inst p{color:var(--med);margin:0}
+.cta{background:var(--rojo);color:#fff;text-align:center;padding:48px 0}
+.cta h2{color:#fff;font-size:1.5rem;max-width:26ch;margin:0 auto 10px}
+.cta p{color:#ffe4dc;margin:0}
+.cta .btn-p{background:#fff;color:var(--rojo)}
+footer{background:var(--osc);color:#cbb9b3;padding:18px 0;font-size:.8rem}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+dialog{border:1px solid var(--borde);border-radius:12px;padding:26px;width:min(380px,92vw)}
+dialog::backdrop{background:rgba(38,20,15,.5)}
+dialog h2{color:var(--rojo);font-size:1.3rem}
+.fila{display:flex;gap:10px;margin-top:16px;justify-content:flex-end}
+
+/* galería y video */
+.galeria{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.galeria figure{margin:0;background:#fff;border:1px solid var(--borde);border-radius:10px;overflow:hidden}
+.foto{position:relative;aspect-ratio:4/3;background:#fbeeee;cursor:zoom-in;display:flex;align-items:center;justify-content:center}
+.foto svg{width:64px;height:64px;opacity:.6}
+.foto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.foto:hover img{transform:scale(1.04)}
+.galeria figcaption{padding:10px 14px;font-size:.88rem;color:var(--med)}
+.creditos{font-size:.78rem;color:var(--med);margin-top:10px}
+.creditos a{color:var(--rojo)}
+.video{margin-top:28px;background:#fff;border:1px solid var(--borde);border-radius:10px;padding:18px}
+.video h3{font-size:1.05rem;color:var(--rojo)}
+.marco{position:relative;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:#26140f}
+.marco video{position:absolute;inset:0;width:100%;height:100%;background:#000}
+.aviso{display:none;margin-top:10px;padding:10px 14px;border-radius:6px;font-size:.88rem;background:#fbf3e6;color:#7a5200;border:1px solid #ecd6a8}
+.lb img{max-width:100%;max-height:78vh;display:block;border-radius:6px}
+dialog.lb{width:min(900px,94vw);border:1px solid var(--borde);border-radius:12px;padding:14px}
+dialog.lb::backdrop{background:rgba(38,20,15,.7)}
+@media(max-width:760px){.galeria{grid-template-columns:1fr}}
+@media(max-width:760px){.hero .wrap{grid-template-columns:1fr}.tabs,.req{grid-template-columns:repeat(2,1fr)}.grid2,.comp{grid-template-columns:1fr}.inst{flex-direction:column}}
+</style>
+</head>
+<body>
+<!-- Símbolos SVG reutilizables -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+ <defs>
+  <symbol id="gota" viewBox="0 0 64 64"><path d="M32 4C32 4 12 28 12 41a20 20 0 0 0 40 0C52 28 32 4 32 4z" fill="#b31111"/><path d="M22 42a10 10 0 0 0 8 10" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" opacity=".6"/></symbol>
+  <symbol id="i-reg" viewBox="0 0 64 64"><circle cx="26" cy="20" r="10" fill="#b31111"/><path d="M6 54c0-12 9-18 20-18s20 6 20 18z" fill="#b31111"/><path d="M50 14v16M42 22h16" stroke="#8a0000" stroke-width="4" stroke-linecap="round"/></symbol>
+  <symbol id="i-his" viewBox="0 0 64 64"><rect x="12" y="6" width="40" height="52" rx="5" fill="#b31111"/><path d="M20 20h24M20 30h24M20 40h14" stroke="#fff" stroke-width="4" stroke-linecap="round"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 64 64"><rect x="6" y="12" width="52" height="46" rx="6" fill="#b31111"/><rect x="6" y="12" width="52" height="12" rx="6" fill="#8a0000"/><path d="M18 6v10M46 6v10" stroke="#8a0000" stroke-width="4" stroke-linecap="round"/><path d="M20 42l8 8 16-16" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-rep" viewBox="0 0 64 64"><rect x="8" y="8" width="48" height="48" rx="6" fill="#b31111"/><rect x="16" y="34" width="8" height="14" fill="#fff"/><rect x="28" y="24" width="8" height="24" fill="#fff"/><rect x="40" y="16" width="8" height="32" fill="#fff"/></symbol>
+  <symbol id="i-edad" viewBox="0 0 64 64"><circle cx="32" cy="32" r="24" fill="#b31111"/><path d="M32 16v16l10 8" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round"/></symbol>
+  <symbol id="i-peso" viewBox="0 0 64 64"><path d="M14 20h36l6 34H8z" fill="#b31111"/><circle cx="32" cy="14" r="7" fill="none" stroke="#8a0000" stroke-width="4"/><path d="M32 32v10" stroke="#fff" stroke-width="4" stroke-linecap="round"/></symbol>
+ </defs>
+</svg>
+
+<header>
+ <div class="nav">
+  <div class="nav-left"><div class="logo-badge"><img src="logo.png" alt="SIGED" onerror="this.replaceWith(Object.assign(document.createElementNS('http://www.w3.org/2000/svg','svg'),{innerHTML:'<use href=&quot;#gota&quot;/>',style:'width:26px;height:26px'}))"></div>SIGED</div>
+  <div class="menu-wrap">
+   <button class="burger" id="burger" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu"><span></span><span></span><span></span></button>
+   <nav class="menu" id="menu">
+    <a href="#inicio"><svg><use href="#gota"/></svg>Inicio</a>
+    <a href="#demo"><svg><use href="#i-his"/></svg>Módulos del sistema</a>
+    <a href="#requisitos"><svg><use href="#i-edad"/></svg>Requisitos</a>
+    <a href="#galeria"><svg><use href="#i-reg"/></svg>Fotos y video</a>
+    <a href="#tipos"><svg><use href="#i-rep"/></svg>Tipos de sangre</a>
+    <a href="#acerca"><svg><use href="#i-reg"/></svg>Acerca de SIGED</a>
+   </nav>
+  </div>
+ </div>
+</header>
+
+<section class="hero" id="inicio"><div class="wrap">
+ <div>
+  <div class="kicker">Banco de sangre</div>
+  <h1>Sistema Integral de Gestión y Evaluación de Donantes de Sangre</h1>
+  <p class="lead">SIGED es la herramienta que utiliza el personal del banco de sangre para registrar donantes, calcular automáticamente su próxima fecha de donación disponible y generar reportes por tipo de sangre.</p>
+  <div class="btns">
+   <a class="btn btn-p" href="#demo" style="text-decoration:none">Probar los módulos</a>
+   <button class="btn" data-ir="his">Consultar historial</button>
+  </div>
+  <div class="stats">
+   <div class="stat"><b id="nDon">0</b><span>Donantes registrados</span></div>
+   <div class="stat"><b>8</b><span>Tipos de sangre</span></div>
+   <div class="stat"><b>4</b><span>Módulos</span></div>
+  </div>
+ </div>
+ <svg viewBox="0 0 300 300" role="img" aria-label="Donación de sangre">
+  <circle cx="150" cy="150" r="130" fill="#fbeeee"/>
+  <path d="M150 40C150 40 90 118 90 168a60 60 0 0 0 120 0C210 118 150 40 150 40z" fill="#b31111"/>
+  <path d="M112 170a38 38 0 0 0 30 36" stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round" opacity=".55"/>
+  <rect x="136" y="128" width="28" height="70" rx="5" fill="#fff"/><rect x="115" y="149" width="70" height="28" rx="5" fill="#fff"/>
+  <path d="M230 210c20 0 34 10 34 30" stroke="#8a0000" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <circle cx="60" cy="90" r="7" fill="#b31111" opacity=".5"/><circle cx="245" cy="95" r="10" fill="#b31111" opacity=".35"/>
+ </svg>
+</div></section>
+
+<section id="demo"><div class="wrap">
+ <div class="kicker">Funcionalidad principal</div>
+ <h2>Módulos del sistema</h2>
+ <p class="lead" style="margin-bottom:20px">Selecciona un módulo para probarlo. Los datos son de demostración y se mantienen solo mientras la página esté abierta.</p>
+ <div class="tabs" role="tablist">
+  <button class="tab on" data-t="reg"><svg><use href="#i-reg"/></svg><strong>Registro de donantes</strong></button>
+  <button class="tab" data-t="his"><svg><use href="#i-his"/></svg><strong>Historial de donaciones</strong></button>
+  <button class="tab" data-t="cal"><svg><use href="#i-cal"/></svg><strong>Próxima donación</strong></button>
+  <button class="tab" data-t="rep"><svg><use href="#i-rep"/></svg><strong>Reportes por tipo</strong></button>
+ </div>
+
+ <div class="panel on" id="p-reg">
+  <h3>Registro de donantes</h3>
+  <p class="d">Captura los datos del donante. El sistema valida edad (18–65) y peso mínimo (50 kg).</p>
+  <div class="grid2">
+   <div><label>Nombre completo</label><input id="rNom" placeholder="Ej. María López"></div>
+   <div><label>Tipo de sangre</label><select id="rTipo"><option>O+</option><option>O-</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option></select></div>
+   <div><label>Edad</label><input id="rEdad" type="number" min="0"></div>
+   <div><label>Peso (kg)</label><input id="rPeso" type="number" min="0"></div>
+   <div><label>Sexo</label><select id="rSexo"><option value="M">Masculino</option><option value="F">Femenino</option></select></div>
+   <div><label>Fecha de última donación (opcional)</label><input id="rUlt" type="date"></div>
+  </div>
+  <div class="btns"><button class="btn btn-p" id="bReg">Registrar donante</button><button class="btn" id="bLimp">Limpiar</button></div>
+  <div class="msg" id="mReg"></div>
+ </div>
+
+ <div class="panel" id="p-his">
+  <h3>Historial de donaciones</h3>
+  <p class="d">Busca por nombre entre los donantes registrados.</p>
+  <input id="hBus" placeholder="Buscar donante…">
+  <div style="overflow-x:auto;margin-top:14px"><table><thead><tr><th>Donante</th><th>Tipo</th><th>Última donación</th><th>Próxima disponible</th></tr></thead><tbody id="hTab"></tbody></table></div>
+ </div>
+
+ <div class="panel" id="p-cal">
+  <h3>Cálculo de próxima donación</h3>
+  <p class="d">Hombres esperan 56 días y mujeres 90 días desde su última donación.</p>
+  <div class="grid2">
+   <div><label>Sexo</label><select id="cSexo"><option value="M">Masculino</option><option value="F">Femenino</option></select></div>
+   <div><label>Fecha de última donación</label><input id="cFecha" type="date"></div>
+  </div>
+  <div class="btns"><button class="btn btn-p" id="bCal">Calcular fecha</button></div>
+  <div class="msg" id="mCal"></div>
+ </div>
+
+ <div class="panel" id="p-rep">
+  <h3>Reportes por tipo de sangre</h3>
+  <p class="d">Donantes disponibles hoy por tipo, útil en emergencias. Se actualiza al registrar donantes.</p>
+  <div class="barras" id="rBar"></div>
+  <div class="btns"><button class="btn" id="bDatos">Cargar datos de ejemplo</button></div>
+ </div>
+</div></section>
+
+<section id="requisitos" style="padding-top:0"><div class="wrap">
+ <div class="kicker">Requisitos</div><h2>¿Quién puede donar?</h2>
+ <div class="req">
+  <div class="rq"><svg><use href="#i-edad"/></svg><div class="v">18–65</div><p>Años de edad</p></div>
+  <div class="rq"><svg><use href="#i-peso"/></svg><div class="v">50 kg</div><p>Peso mínimo</p></div>
+  <div class="rq"><svg><use href="#i-cal"/></svg><div class="v">56 días</div><p>Espera entre donaciones (hombres)</p></div>
+  <div class="rq"><svg><use href="#i-cal"/></svg><div class="v">90 días</div><p>Espera entre donaciones (mujeres)</p></div>
+ </div>
+</div></section>
+
+<section id="galeria" style="padding-top:0"><div class="wrap">
+ <div class="kicker">Así se dona</div><h2>Donantes y personal médico</h2>
+ <p class="lead" style="margin-bottom:18px">Cada donación se realiza con personal capacitado y material estéril. Toca una foto para ampliarla.</p>
+ <div class="galeria">
+  <figure><div class="foto" title="Ampliar"><svg><use href="#gota"/></svg><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Blood_Donation_%2844291611580%29.jpg?width=800" alt="Donación de sangre" loading="lazy" onerror="this.remove()"></div><figcaption>Donación de sangre</figcaption></figure>
+  <figure><div class="foto" title="Ampliar"><svg><use href="#gota"/></svg><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Blood_Donation_12-07-06_1.JPG?width=800" alt="Banco de sangre de la Cruz Roja Australiana" loading="lazy" onerror="this.remove()"></div><figcaption>Banco de sangre de la Cruz Roja Australiana</figcaption></figure>
+  <figure><div class="foto" title="Ampliar"><svg><use href="#gota"/></svg><img src="https://commons.wikimedia.org/wiki/Special:FilePath/Blood_donation_%28test_tubes%29.JPG?width=800" alt="Muestras de sangre donada, listas para análisis" loading="lazy" onerror="this.remove()"></div><figcaption>Muestras de sangre donada, listas para análisis</figcaption></figure>
+ </div>
+ <p class="creditos">Fotos de <a href="https://commons.wikimedia.org/wiki/Category:Blood_donation" target="_blank" rel="noopener">Wikimedia Commons</a>: NIAID (CC BY 2.0), Waldszenen (uso libre) y Vegasjon (CC BY-SA 4.0).</p>
+ <div class="video">
+  <h3>Video: la donación de sangre, paso a paso</h3>
+  <div class="marco"><video id="vid" controls preload="metadata" playsinline>
+   <source src="video/donacion-sangre.mp4" type="video/mp4" id="vidSrc">
+   Tu navegador no puede reproducir este video.
+  </video></div>
+  <p class="creditos">Fuente del video: <a href="hhttps://res.cloudinary.com/brxjlqwf/video/upload/v1790623666/donacion-sangre.mp4" target="_blank" rel="noopener">La donación de sangre, paso a paso (YouTube)</a>.</p>
+ </div>
+</div></section>
+
+<dialog class="lb" id="lb"><img id="lbImg" alt=""><div class="fila"><button class="btn" id="lbCerrar">Cerrar</button></div></dialog>
+
+<section id="tipos" style="padding-top:0"><div class="wrap">
+ <div class="kicker">Compatibilidad</div><h2>Tipos de sangre</h2>
+ <p class="lead">Elige un tipo para ver a quién puede donar y de quién puede recibir.</p>
+ <div class="tipos" id="selTipos"></div>
+ <div class="comp">
+  <div><h3>Puede donar a</h3><div class="chips" id="cDon"></div></div>
+  <div><h3>Puede recibir de</h3><div class="chips" id="cRec"></div></div>
+ </div>
+</div></section>
+
+<section id="acerca" style="padding-top:0"><div class="wrap"><div class="inst">
+ <div class="logo-badge"><svg style="width:28px;height:28px"><use href="#gota"/></svg></div>
+ <p><strong>Un registro confiable detrás de cada donación.</strong> SIGED permite al personal del banco de sangre llevar un control ordenado de cada donante, evitar donaciones antes de tiempo y responder rápido en situaciones de emergencia.</p>
+</div></div></section>
+
+<div class="cta"><div class="wrap">
+ <h2>Un sistema pensado para salvar tiempo y salvar vidas</h2>
+ <p>Próximamente: acceso completo a los módulos de SIGED.</p>
+</div></div>
+
+<footer><div class="wrap"><div>SIGED — Sistema Integral de Gestión y Evaluación de Donantes de Sangre · INFRAMEN</div></div></footer>
+
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const DIAS={M:56,F:90};
+let donantes=[];
+const fmt=d=>d.toLocaleDateString('es-SV',{day:'2-digit',month:'long',year:'numeric'});
+const hoy=()=>{const d=new Date();d.setHours(0,0,0,0);return d};
+const sumar=(f,n)=>{const d=new Date(f+'T00:00:00');d.setDate(d.getDate()+n);return d};
+const msg=(el,t,c)=>{el.className='msg '+c;el.textContent=t};
+
+/* Pestañas */
+function ir(t){
+  $$('.tab').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+  $$('.panel').forEach(p=>p.classList.toggle('on',p.id==='p-'+t));
+  if(t==='his')pintarHis(); if(t==='rep')pintarRep();
+}
+$$('.tab').forEach(b=>b.onclick=()=>ir(b.dataset.t));
+$$('[data-ir]').forEach(b=>b.onclick=()=>{ir(b.dataset.ir);$('#demo').scrollIntoView()});
+
+/* Registro */
+$('#bReg').onclick=()=>{
+  const m=$('#mReg'),nom=$('#rNom').value.trim(),edad=+$('#rEdad').value,peso=+$('#rPeso').value;
+  if(!nom||!edad||!peso)return msg(m,'Completa nombre, edad y peso.','err');
+  if(edad<18||edad>65)return msg(m,'No apto: la edad debe estar entre 18 y 65 años.','err');
+  if(peso<50)return msg(m,'No apto: el peso mínimo es 50 kg.','err');
+  const sexo=$('#rSexo').value,ult=$('#rUlt').value;
+  donantes.push({nom,tipo:$('#rTipo').value,sexo,ult});
+  msg(m,'Donante registrado: '+nom+'.','ok');
+  actualizar();
+};
+$('#bLimp').onclick=()=>{$$('#p-reg input').forEach(i=>i.value='');$('#mReg').className='msg'};
+
+/* Historial */
+function prox(d){
+  if(!d.ult)return{txt:'Disponible ahora',ok:true};
+  const f=sumar(d.ult,DIAS[d.sexo]);
+  return{txt:f<=hoy()?'Disponible ahora':fmt(f),ok:f<=hoy()};
+}
+function pintarHis(){
+  const q=$('#hBus').value.toLowerCase();
+  const f=donantes.filter(d=>d.nom.toLowerCase().includes(q));
+  $('#hTab').innerHTML=f.length?f.map(d=>{const p=prox(d);return`<tr><td>${esc(d.nom)}</td><td>${d.tipo}</td><td>${d.ult?fmt(new Date(d.ult+'T00:00:00')):'—'}</td><td style="color:${p.ok?'var(--ok)':'var(--med)'};font-weight:${p.ok?700:400}">${p.txt}</td></tr>`}).join(''):'<tr><td colspan="4" style="color:var(--med)">Sin resultados. Registra un donante o carga datos de ejemplo.</td></tr>';
+}
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+$('#hBus').oninput=pintarHis;
+
+/* Calculadora */
+$('#bCal').onclick=()=>{
+  const m=$('#mCal'),f=$('#cFecha').value;
+  if(!f)return msg(m,'Selecciona la fecha de la última donación.','err');
+  const n=DIAS[$('#cSexo').value],p=sumar(f,n),dif=Math.ceil((p-hoy())/864e5);
+  if(dif<=0)msg(m,'Puede donar desde el '+fmt(p)+'. Ya está disponible.','ok');
+  else msg(m,'Próxima donación: '+fmt(p)+' (faltan '+dif+' días).','info');
+};
+
+/* Reportes */
+const TIPOS=['O+','O-','A+','A-','B+','B-','AB+','AB-'];
+function pintarRep(){
+  const c={};TIPOS.forEach(t=>c[t]=0);
+  donantes.filter(d=>prox(d).ok).forEach(d=>c[d.tipo]++);
+  const mx=Math.max(1,...Object.values(c));
+  $('#rBar').innerHTML=TIPOS.map(t=>`<div class="barra"><b>${t}</b><div class="t"><i data-w="${c[t]/mx*100}"></i></div><span>${c[t]}</span></div>`).join('');
+  requestAnimationFrame(()=>$$('#rBar i').forEach(i=>i.style.width=i.dataset.w+'%'));
+}
+$('#bDatos').onclick=()=>{
+  const ej=[['Ana Pérez','O+','F','2026-05-01'],['Luis Gómez','A+','M','2026-09-01'],['Carla Ruiz','O-','F',''],['Mario Díaz','B+','M','2026-06-15'],['Sofía Marín','AB+','F','2026-08-20'],['José Cruz','O+','M','']];
+  ej.forEach(([nom,tipo,sexo,ult])=>donantes.push({nom,tipo,sexo,ult}));
+  actualizar();pintarRep();
+};
+function actualizar(){$('#nDon').textContent=donantes.length;pintarHis();if($('#p-rep').classList.contains('on'))pintarRep()}
+
+/* Compatibilidad */
+const DON={'O-':TIPOS,'O+':['O+','A+','B+','AB+'],'A-':['A+','A-','AB+','AB-'],'A+':['A+','AB+'],'B-':['B+','B-','AB+','AB-'],'B+':['B+','AB+'],'AB-':['AB+','AB-'],'AB+':['AB+']};
+function tipo(t){
+  $$('.tipo').forEach(b=>b.classList.toggle('on',b.textContent===t));
+  const chip=a=>a.map(x=>`<span class="chip">${x}</span>`).join('');
+  $('#cDon').innerHTML=chip(DON[t]);
+  $('#cRec').innerHTML=chip(TIPOS.filter(x=>DON[x].includes(t)));
+}
+$('#selTipos').innerHTML=TIPOS.map(t=>`<button class="tipo">${t}</button>`).join('');
+$$('.tipo').forEach(b=>b.onclick=()=>tipo(b.textContent));
+tipo('O+');
+
+/* Video local */
+$('#vidSrc').addEventListener('error',()=>{$('#vidAviso').style.display='block'});
+
+/* Ampliar fotos */
+const lb=$('#lb');
+$$('.foto').forEach(f=>f.onclick=()=>{const i=f.querySelector('img');if(!i)return;$('#lbImg').src=i.src;$('#lbImg').alt=i.alt;lb.showModal()});
+$('#lbCerrar').onclick=()=>lb.close();
+lb.addEventListener('click',e=>{if(e.target===lb)lb.close()});
+
+/* Menú hamburguesa */
+const burger=$('#burger'),menu=$('#menu');
+function menuToggle(abrir){
+  menu.classList.toggle('abierto',abrir);burger.classList.toggle('abierto',abrir);
+  burger.setAttribute('aria-expanded',abrir);
+}
+burger.onclick=e=>{e.stopPropagation();menuToggle(!menu.classList.contains('abierto'))};
+$$('#menu a').forEach(a=>a.onclick=()=>menuToggle(false));
+document.addEventListener('click',e=>{if(!menu.contains(e.target))menuToggle(false)});
+addEventListener('keydown',e=>{if(e.key==='Escape')menuToggle(false)});
+
+/* Sección activa en el menú */
+const sec=['inicio','demo','requisitos','galeria','tipos','acerca'];
+function activa(){
+  let a='inicio';sec.forEach(id=>{if($('#'+id).getBoundingClientRect().top<140)a=id});
+  $$('#menu a').forEach(l=>l.classList.toggle('activo',l.getAttribute('href')==='#'+a));
+}
+addEventListener('scroll',activa);activa();
+</script>
+</body>
+</html>
